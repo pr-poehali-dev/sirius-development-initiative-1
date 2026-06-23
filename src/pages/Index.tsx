@@ -241,7 +241,7 @@ export default function Index() {
                 УРА!!!!
               </h1>
               <p className="text-xl font-extrabold text-pink-500">
-                Жди звонка! И жди пока я приду в себя от счастья 💕
+                Подожди пока я приду в себя от счастья и позвоню тебе!) 💕
               </p>
             </div>
           </>
