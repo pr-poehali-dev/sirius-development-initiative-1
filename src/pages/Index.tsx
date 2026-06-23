@@ -343,10 +343,8 @@ export default function Index() {
               </div>
             </div>
             <p className="mb-8 text-base font-semibold leading-relaxed text-rose-500/90">
-              К сожалению, я не программист и не смог настроить, чтобы твои ответы пришли мне. Поэтому
-              прошу сфоткать варианты ответов и прислать мне. Если фоточку мне не пришлёшь, то давай
-              будем считать это твоим желанием следовать своим принципам и что 40 лет для тебя всё ещё
-              много.
+              Я не программист, поэтому просто сфоткай экран и пришли мне 🥺
+              Иначе буду считать, что 40 лет тебя всё ещё устраивают...
             </p>
             <div className="relative flex h-28 flex-col items-center justify-center gap-4 sm:h-24 sm:flex-row">
               <button onClick={() => goWithSound(6, "fanfare")} className={PrimaryBtn}>
