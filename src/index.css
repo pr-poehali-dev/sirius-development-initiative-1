@@ -141,6 +141,33 @@
     animation: wiggle 0.4s ease-in-out infinite;
   }
 
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-30px) translateX(0) rotate(0deg);
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh) translateX(var(--sway, 60px)) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes yay-pulse {
+    0%,
+    100% {
+      transform: scale(1) rotate(-2deg);
+    }
+    50% {
+      transform: scale(1.1) rotate(2deg);
+    }
+  }
+  .animate-yay {
+    animation: yay-pulse 0.5s ease-in-out infinite;
+  }
+
   [data-scroll-container] {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;

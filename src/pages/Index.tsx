@@ -1,6 +1,46 @@
 import { useState, useRef } from "react"
 import Icon from "@/components/ui/icon"
 
+const CONFETTI_COLORS = ["#f472b6", "#fb923c", "#facc15", "#34d399", "#60a5fa", "#c084fc", "#f9a8d4"]
+
+function Confetti() {
+  const pieces = useRef(
+    Array.from({ length: 60 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 3,
+      duration: 3 + Math.random() * 3,
+      size: 8 + Math.random() * 10,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      rotate: Math.random() * 360,
+      shape: Math.random() > 0.5 ? "circle" : "rect",
+      sway: (Math.random() - 0.5) * 120,
+    }))
+  )
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+      {pieces.current.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: "absolute",
+            left: `${p.x}%`,
+            top: "-30px",
+            width: p.size,
+            height: p.shape === "circle" ? p.size : p.size * 0.5,
+            backgroundColor: p.color,
+            borderRadius: p.shape === "circle" ? "50%" : "2px",
+            transform: `rotate(${p.rotate}deg)`,
+            animation: `confetti-fall ${p.duration}s ${p.delay}s ease-in infinite`,
+            ["--sway" as string]: `${p.sway}px`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 const CATS = {
   ask: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/d6d2a2cb-ac02-472b-8ce2-31287a960247.jpg",
   happy: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/18cd7a76-8a4a-4800-b70f-ffe54355a0fc.jpg",
@@ -182,7 +222,7 @@ export default function Index() {
               много.
             </p>
             <div className="relative flex h-28 flex-col items-center justify-center gap-4 sm:h-24 sm:flex-row">
-              <button onClick={() => go(2)} className={PrimaryBtn}>
+              <button onClick={() => go(6)} className={PrimaryBtn}>
                 Я отправила фото
               </button>
               <RunawayButton className="bg-white text-rose-400 shadow-md ring-2 ring-rose-200">
@@ -190,6 +230,24 @@ export default function Index() {
               </RunawayButton>
             </div>
           </div>
+        )}
+        {/* STEP 6 — финал с конфетти */}
+        {step === 6 && (
+          <>
+            <Confetti />
+            <div key="s6" className="relative z-10 w-full max-w-md animate-pop-in text-center">
+              <CatImage src={CATS.happy} alt="Радостный котик" wiggle />
+              <h1 className="animate-yay mb-4 text-6xl font-black text-rose-500 sm:text-7xl">
+                УРА!!!!
+              </h1>
+              <p className="mb-3 text-xl font-extrabold text-pink-500">
+                Жду звонка! 🐾
+              </p>
+              <p className="text-base font-semibold text-rose-400/80">
+                Буду ждать, пока ты придёшь в себя от счастья {"💕"}
+              </p>
+            </div>
+          </>
         )}
       </div>
     </main>
