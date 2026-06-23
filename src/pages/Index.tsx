@@ -1,6 +1,39 @@
 import { useState, useRef, useEffect } from "react"
 import Icon from "@/components/ui/icon"
 
+function playKisKis() {
+  const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+
+  const kiss = (startTime: number) => {
+    const noise = ctx.createOscillator()
+    const gain = ctx.createGain()
+    const filter = ctx.createBiquadFilter()
+
+    noise.type = "sine"
+    noise.frequency.setValueAtTime(3800, ctx.currentTime + startTime)
+    noise.frequency.linearRampToValueAtTime(2200, ctx.currentTime + startTime + 0.08)
+    noise.frequency.linearRampToValueAtTime(3500, ctx.currentTime + startTime + 0.14)
+
+    filter.type = "bandpass"
+    filter.frequency.value = 3000
+    filter.Q.value = 0.8
+
+    noise.connect(filter)
+    filter.connect(gain)
+    gain.connect(ctx.destination)
+
+    gain.gain.setValueAtTime(0, ctx.currentTime + startTime)
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + startTime + 0.03)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + 0.18)
+
+    noise.start(ctx.currentTime + startTime)
+    noise.stop(ctx.currentTime + startTime + 0.2)
+  }
+
+  kiss(0)
+  kiss(0.28)
+}
+
 function playPurr() {
   const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
   const duration = 3.5
@@ -201,7 +234,7 @@ export default function Index() {
   }
 
   useEffect(() => {
-    const timeout = setTimeout(() => playSound("meow"), 600)
+    const timeout = setTimeout(() => playKisKis(), 600)
     return () => clearTimeout(timeout)
   }, [])
 
