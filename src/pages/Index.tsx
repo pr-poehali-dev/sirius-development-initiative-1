@@ -139,6 +139,7 @@ const PLACES = [
   { label: "Кафе-мафе, покушать", icon: "UtensilsCrossed" },
   { label: "Цирк", icon: "Drama" },
   { label: "Аттракционы", icon: "FerrisWheel" },
+  { label: "Поедим в приют для собак", icon: "Dog" },
 ]
 
 function RunawayButton({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -185,6 +186,8 @@ export default function Index() {
   const [step, setStep] = useState(1)
   const [place, setPlace] = useState("")
   const [datetime, setDatetime] = useState("")
+  const [customPlace, setCustomPlace] = useState("")
+  const [showCustomInput, setShowCustomInput] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const go = (s: number) => {
@@ -257,6 +260,7 @@ export default function Index() {
                   key={p.label}
                   onClick={() => {
                     setPlace(p.label)
+                    setShowCustomInput(false)
                     goWithSound(4, "click")
                   }}
                   className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-6 font-extrabold text-rose-500 shadow-md ring-2 ring-pink-100 transition-all hover:scale-105 hover:bg-white hover:shadow-lg active:scale-95"
@@ -265,7 +269,35 @@ export default function Index() {
                   {p.label}
                 </button>
               ))}
+              <button
+                onClick={() => { setShowCustomInput(true); playSound("click") }}
+                className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-6 font-extrabold text-rose-500 shadow-md ring-2 ring-pink-100 transition-all hover:scale-105 hover:bg-white hover:shadow-lg active:scale-95"
+              >
+                <Icon name="Pencil" size={36} className="text-pink-400" />
+                Твой вариант
+              </button>
             </div>
+            {showCustomInput && (
+              <div className="mt-4 flex gap-2">
+                <input
+                  autoFocus
+                  value={customPlace}
+                  onChange={(e) => setCustomPlace(e.target.value)}
+                  placeholder="Напиши свой вариант..."
+                  className="flex-1 rounded-2xl border-2 border-pink-200 bg-white/90 px-4 py-3 font-bold text-rose-500 shadow-inner outline-none focus:border-pink-400"
+                />
+                <button
+                  disabled={!customPlace.trim()}
+                  onClick={() => {
+                    setPlace(customPlace.trim())
+                    goWithSound(4, "click")
+                  }}
+                  className={`${PrimaryBtn} px-6 py-3 text-base ${!customPlace.trim() ? "cursor-not-allowed opacity-40 hover:scale-100" : ""}`}
+                >
+                  ОК
+                </button>
+              </div>
+            )}
           </div>
         )}
 
