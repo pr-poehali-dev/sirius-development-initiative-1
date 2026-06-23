@@ -1,313 +1,197 @@
-import { Shader, ChromaFlow, Swirl } from "shaders/react"
-import { CustomCursor } from "@/components/custom-cursor"
-import { GrainOverlay } from "@/components/grain-overlay"
-import { WorkSection } from "@/components/sections/work-section"
-import { ServicesSection } from "@/components/sections/services-section"
-import { AboutSection } from "@/components/sections/about-section"
-import { ContactSection } from "@/components/sections/contact-section"
-import { MagneticButton } from "@/components/magnetic-button"
-import { useRef, useEffect, useState } from "react"
+import { useState, useRef } from "react"
+import Icon from "@/components/ui/icon"
 
-export default function Index() {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [currentSection, setCurrentSection] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const touchStartY = useRef(0)
-  const touchStartX = useRef(0)
-  const shaderContainerRef = useRef<HTMLDivElement>(null)
-  const scrollThrottleRef = useRef<number>()
+const CATS = {
+  ask: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/d6d2a2cb-ac02-472b-8ce2-31287a960247.jpg",
+  happy: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/18cd7a76-8a4a-4800-b70f-ffe54355a0fc.jpg",
+  writing: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/73e2e2b3-4492-4930-b7c4-f22120f598f8.jpg",
+  clock: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/49650bc7-b1d3-4eff-a351-7d2ad2dca29f.jpg",
+  sad: "https://cdn.poehali.dev/projects/20aa7ced-b5b6-4a89-a004-16993173c9d5/files/c8e5f3d2-e3b6-42e1-9cc1-0981002843f7.jpg",
+}
 
-  useEffect(() => {
-    const checkShaderReady = () => {
-      if (shaderContainerRef.current) {
-        const canvas = shaderContainerRef.current.querySelector("canvas")
-        if (canvas && canvas.width > 0 && canvas.height > 0) {
-          setIsLoaded(true)
-          return true
-        }
-      }
-      return false
-    }
+const PLACES = [
+  { label: "Кино", icon: "Film" },
+  { label: "Ресторан", icon: "UtensilsCrossed" },
+  { label: "Цирк", icon: "Drama" },
+  { label: "Аттракционы", icon: "FerrisWheel" },
+]
 
-    if (checkShaderReady()) return
+function RunawayButton({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const [pos, setPos] = useState({ x: 0, y: 0 })
 
-    const intervalId = setInterval(() => {
-      if (checkShaderReady()) {
-        clearInterval(intervalId)
-      }
-    }, 100)
-
-    const fallbackTimer = setTimeout(() => {
-      setIsLoaded(true)
-    }, 1500)
-
-    return () => {
-      clearInterval(intervalId)
-      clearTimeout(fallbackTimer)
-    }
-  }, [])
-
-  const scrollToSection = (index: number) => {
-    if (scrollContainerRef.current) {
-      const sectionWidth = scrollContainerRef.current.offsetWidth
-      scrollContainerRef.current.scrollTo({
-        left: sectionWidth * index,
-        behavior: "smooth",
-      })
-      setCurrentSection(index)
-    }
+  const runAway = () => {
+    const angle = Math.random() * Math.PI * 2
+    const dist = 120 + Math.random() * 80
+    setPos({ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist })
   }
 
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY
-      touchStartX.current = e.touches[0].clientX
-    }
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (Math.abs(e.touches[0].clientY - touchStartY.current) > 10) {
+  return (
+    <button
+      onMouseEnter={runAway}
+      onTouchStart={(e) => {
         e.preventDefault()
-      }
-    }
+        runAway()
+      }}
+      onClick={(e) => e.preventDefault()}
+      style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+      className={`relative rounded-full px-10 py-4 text-lg font-extrabold transition-transform duration-200 ease-out ${className}`}
+    >
+      {children}
+    </button>
+  )
+}
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touchEndY = e.changedTouches[0].clientY
-      const touchEndX = e.changedTouches[0].clientX
-      const deltaY = touchStartY.current - touchEndY
-      const deltaX = touchStartX.current - touchEndX
+function CatImage({ src, alt, wiggle = false }: { src: string; alt: string; wiggle?: boolean }) {
+  return (
+    <div className={`mx-auto mb-6 ${wiggle ? "animate-wiggle" : "animate-float-cat"}`}>
+      <img
+        src={src}
+        alt={alt}
+        className="mx-auto h-52 w-52 rounded-[2.5rem] object-cover shadow-[0_20px_50px_-15px_rgba(244,114,182,0.5)] sm:h-64 sm:w-64"
+      />
+    </div>
+  )
+}
 
-      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
-        if (deltaY > 0 && currentSection < 4) {
-          scrollToSection(currentSection + 1)
-        } else if (deltaY < 0 && currentSection > 0) {
-          scrollToSection(currentSection - 1)
-        }
-      }
-    }
+const PrimaryBtn =
+  "rounded-full bg-gradient-to-r from-pink-400 to-rose-400 px-10 py-4 text-lg font-extrabold text-white shadow-lg shadow-pink-300/50 transition-all hover:scale-105 hover:shadow-xl active:scale-95"
 
-    const container = scrollContainerRef.current
-    if (container) {
-      container.addEventListener("touchstart", handleTouchStart, { passive: true })
-      container.addEventListener("touchmove", handleTouchMove, { passive: false })
-      container.addEventListener("touchend", handleTouchEnd, { passive: true })
-    }
+export default function Index() {
+  const [step, setStep] = useState(1)
+  const [place, setPlace] = useState("")
+  const [datetime, setDatetime] = useState("")
+  const containerRef = useRef<HTMLDivElement>(null)
 
-    return () => {
-      if (container) {
-        container.removeEventListener("touchstart", handleTouchStart)
-        container.removeEventListener("touchmove", handleTouchMove)
-        container.removeEventListener("touchend", handleTouchEnd)
-      }
-    }
-  }, [currentSection])
-
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault()
-
-        if (!scrollContainerRef.current) return
-
-        scrollContainerRef.current.scrollBy({
-          left: e.deltaY,
-          behavior: "instant",
-        })
-
-        const sectionWidth = scrollContainerRef.current.offsetWidth
-        const newSection = Math.round(scrollContainerRef.current.scrollLeft / sectionWidth)
-        if (newSection !== currentSection) {
-          setCurrentSection(newSection)
-        }
-      }
-    }
-
-    const container = scrollContainerRef.current
-    if (container) {
-      container.addEventListener("wheel", handleWheel, { passive: false })
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener("wheel", handleWheel)
-      }
-    }
-  }, [currentSection])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollThrottleRef.current) return
-
-      scrollThrottleRef.current = requestAnimationFrame(() => {
-        if (!scrollContainerRef.current) {
-          scrollThrottleRef.current = undefined
-          return
-        }
-
-        const sectionWidth = scrollContainerRef.current.offsetWidth
-        const scrollLeft = scrollContainerRef.current.scrollLeft
-        const newSection = Math.round(scrollLeft / sectionWidth)
-
-        if (newSection !== currentSection && newSection >= 0 && newSection <= 4) {
-          setCurrentSection(newSection)
-        }
-
-        scrollThrottleRef.current = undefined
-      })
-    }
-
-    const container = scrollContainerRef.current
-    if (container) {
-      container.addEventListener("scroll", handleScroll, { passive: true })
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll)
-      }
-      if (scrollThrottleRef.current) {
-        cancelAnimationFrame(scrollThrottleRef.current)
-      }
-    }
-  }, [currentSection])
+  const go = (s: number) => {
+    setStep(s)
+    containerRef.current?.scrollTo({ top: 0 })
+  }
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-background">
-      <CustomCursor />
-      <GrainOverlay />
+    <main className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50">
+      {/* decorative blobs */}
+      <div className="pointer-events-none fixed -left-20 -top-20 h-72 w-72 rounded-full bg-pink-200/40 blur-3xl" />
+      <div className="pointer-events-none fixed -bottom-24 -right-16 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
+      <div className="pointer-events-none fixed left-1/2 top-1/3 h-60 w-60 rounded-full bg-rose-200/30 blur-3xl" />
 
       <div
-        ref={shaderContainerRef}
-        className={`fixed inset-0 z-0 transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
-        style={{ contain: "strict" }}
+        ref={containerRef}
+        className="relative z-10 flex min-h-screen w-full items-center justify-center px-5 py-10"
       >
-        <Shader className="h-full w-full">
-          <Swirl
-            colorA="#1275d8"
-            colorB="#e19136"
-            speed={0.8}
-            detail={0.8}
-            blend={50}
-            coarseX={40}
-            coarseY={40}
-            mediumX={40}
-            mediumY={40}
-            fineX={40}
-            fineY={40}
-          />
-          <ChromaFlow
-            baseColor="#0066ff"
-            upColor="#0066ff"
-            downColor="#d1d1d1"
-            leftColor="#e19136"
-            rightColor="#e19136"
-            intensity={0.9}
-            radius={1.8}
-            momentum={25}
-            maskType="alpha"
-            opacity={0.97}
-          />
-        </Shader>
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
-
-      <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <button
-          onClick={() => scrollToSection(0)}
-          className="flex items-center gap-2 transition-transform hover:scale-105"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
-            <span className="font-sans text-xl font-bold text-foreground">F</span>
-          </div>
-          <span className="font-sans text-xl font-semibold tracking-tight text-foreground">Flowrise</span>
-        </button>
-
-        <div className="hidden items-center gap-8 md:flex">
-          {["Главная", "Работы", "Услуги", "О нас", "Контакты"].map((item, index) => (
-            <button
-              key={item}
-              onClick={() => scrollToSection(index)}
-              className={`group relative font-sans text-sm font-medium transition-colors ${
-                currentSection === index ? "text-foreground" : "text-foreground/80 hover:text-foreground"
-              }`}
-            >
-              {item}
-              <span
-                className={`absolute -bottom-1 left-0 h-px bg-foreground transition-all duration-300 ${
-                  currentSection === index ? "w-full" : "w-0 group-hover:w-full"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-
-        <MagneticButton variant="secondary" onClick={() => scrollToSection(4)}>
-          Начать
-        </MagneticButton>
-      </nav>
-
-      <div
-        ref={scrollContainerRef}
-        data-scroll-container
-        className={`relative z-10 flex h-screen overflow-x-auto overflow-y-hidden transition-opacity duration-700 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {/* Hero Section */}
-        <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
-          <div className="max-w-3xl">
-            <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
-              <p className="font-mono text-xs text-foreground/90">Современные технологии</p>
-            </div>
-            <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-sans text-6xl font-light leading-[1.1] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
-              <span className="text-balance">
-                Цифровое будущее
-              </span>
+        {/* STEP 1 */}
+        {step === 1 && (
+          <div key="s1" className="w-full max-w-md animate-pop-in text-center">
+            <CatImage src={CATS.ask} alt="Милый котик" />
+            <h1 className="mb-10 text-3xl font-black leading-snug text-rose-500 sm:text-4xl">
+              КАТЁНА! Ты хочешь стать счастливой и пойти со мной на свидание?{")))"}
             </h1>
-            <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
-              <span className="text-pretty">
-                Создаем современные веб-приложения и цифровые продукты, которые помогают бизнесу расти и развиваться.
-              </span>
-            </p>
-            <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
-              <MagneticButton
-                size="lg"
-                variant="primary"
-                onClick={() => scrollToSection(4)}
-              >
-                Обсудить проект
-              </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(2)}>
-                Наши услуги
-              </MagneticButton>
+            <div className="relative flex h-24 items-center justify-center gap-6">
+              <button onClick={() => go(2)} className={PrimaryBtn}>
+                ДА
+              </button>
+              <RunawayButton className="bg-white text-rose-400 shadow-md ring-2 ring-rose-200">
+                НЕТ
+              </RunawayButton>
             </div>
           </div>
+        )}
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
-            <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-foreground/80">Листайте вправо</p>
-              <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-foreground/80" />
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div key="s2" className="w-full max-w-md animate-pop-in text-center">
+            <CatImage src={CATS.happy} alt="Радостный котик" wiggle />
+            <h1 className="mb-10 break-words text-4xl font-black text-rose-500 sm:text-5xl">
+              ЕЕЕЕЕЕЕЕЕЕЕЕ{")"}
+            </h1>
+            <button onClick={() => go(3)} className={PrimaryBtn}>
+              Дальше
+            </button>
+          </div>
+        )}
+
+        {/* STEP 3 */}
+        {step === 3 && (
+          <div key="s3" className="w-full max-w-md animate-pop-in text-center">
+            <CatImage src={CATS.writing} alt="Котик записывает" />
+            <h1 className="mb-8 text-2xl font-black leading-snug text-rose-500 sm:text-3xl">
+              Куда я пойду с самой потрясающей девушкой в мире?
+            </h1>
+            <div className="grid grid-cols-2 gap-4">
+              {PLACES.map((p) => (
+                <button
+                  key={p.label}
+                  onClick={() => {
+                    setPlace(p.label)
+                    go(4)
+                  }}
+                  className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-6 font-extrabold text-rose-500 shadow-md ring-2 ring-pink-100 transition-all hover:scale-105 hover:bg-white hover:shadow-lg active:scale-95"
+                >
+                  <Icon name={p.icon} size={36} className="text-pink-400" />
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4 */}
+        {step === 4 && (
+          <div key="s4" className="w-full max-w-md animate-pop-in text-center">
+            <CatImage src={CATS.clock} alt="Котик смотрит на часы" />
+            <h1 className="mb-8 text-2xl font-black leading-snug text-rose-500 sm:text-3xl">
+              Лапушка моя ненаглядная! Когда тебе будет удобно?
+            </h1>
+            <input
+              type="datetime-local"
+              value={datetime}
+              onChange={(e) => setDatetime(e.target.value)}
+              className="mb-8 w-full rounded-2xl border-2 border-pink-200 bg-white/90 px-5 py-4 text-center text-lg font-bold text-rose-500 shadow-inner outline-none focus:border-pink-400"
+            />
+            <button
+              onClick={() => go(5)}
+              disabled={!datetime}
+              className={`${PrimaryBtn} ${!datetime ? "cursor-not-allowed opacity-40 hover:scale-100" : ""}`}
+            >
+              Дальше
+            </button>
+          </div>
+        )}
+
+        {/* STEP 5 */}
+        {step === 5 && (
+          <div key="s5" className="w-full max-w-lg animate-pop-in text-center">
+            <CatImage src={CATS.sad} alt="Задумчивый котик" />
+            <div className="mb-6 space-y-3 rounded-3xl bg-white/80 p-6 text-left shadow-md ring-2 ring-pink-100">
+              <div className="flex items-center gap-3">
+                <Icon name="MapPin" size={22} className="text-pink-400" />
+                <span className="font-extrabold text-rose-500">Место:</span>
+                <span className="font-bold text-rose-400">{place}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Icon name="CalendarHeart" size={22} className="text-pink-400" />
+                <span className="font-extrabold text-rose-500">Когда:</span>
+                <span className="font-bold text-rose-400">
+                  {datetime ? new Date(datetime).toLocaleString("ru-RU", { dateStyle: "long", timeStyle: "short" }) : ""}
+                </span>
               </div>
             </div>
+            <p className="mb-8 text-base font-semibold leading-relaxed text-rose-500/90">
+              К сожалению, я не программист и не смог настроить, чтобы твои ответы пришли мне. Поэтому
+              прошу сфоткать варианты ответов и прислать мне. Если фоточку мне не пришлёшь, то давай
+              будем считать это твоим желанием следовать своим принципам и что 40 лет для тебя всё ещё
+              много.
+            </p>
+            <div className="relative flex h-28 flex-col items-center justify-center gap-4 sm:h-24 sm:flex-row">
+              <button onClick={() => go(2)} className={PrimaryBtn}>
+                Я отправила фото
+              </button>
+              <RunawayButton className="bg-white text-rose-400 shadow-md ring-2 ring-rose-200">
+                Я верна своим принципам
+              </RunawayButton>
+            </div>
           </div>
-        </section>
-
-        <WorkSection />
-        <ServicesSection />
-        <AboutSection scrollToSection={scrollToSection} />
-        <ContactSection />
+        )}
       </div>
-
-      <style>{`
-        div::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </main>
   )
 }
