@@ -1,5 +1,54 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import Icon from "@/components/ui/icon"
+
+function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare") {
+  const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+
+  const play = (freq: number, start: number, dur: number, vol = 0.3, wave: OscillatorType = "sine") => {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.type = wave
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + start)
+    gain.gain.setValueAtTime(0, ctx.currentTime + start)
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur)
+    osc.start(ctx.currentTime + start)
+    osc.stop(ctx.currentTime + start + dur + 0.05)
+  }
+
+  if (type === "meow") {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.type = "sine"
+    osc.frequency.setValueAtTime(600, ctx.currentTime)
+    osc.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.1)
+    osc.frequency.linearRampToValueAtTime(700, ctx.currentTime + 0.3)
+    gain.gain.setValueAtTime(0.25, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4)
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.45)
+  } else if (type === "yay") {
+    [0, 0.12, 0.24].forEach((t, i) => play(500 + i * 150, t, 0.18, 0.2))
+    play(900, 0.36, 0.4, 0.25)
+  } else if (type === "click") {
+    play(800, 0, 0.06, 0.15, "square")
+    play(1000, 0.05, 0.08, 0.12, "square")
+  } else if (type === "tick") {
+    play(1200, 0, 0.04, 0.1, "sine")
+  } else if (type === "sad") {
+    play(500, 0, 0.3, 0.2)
+    play(400, 0.25, 0.35, 0.18)
+    play(350, 0.5, 0.5, 0.15)
+  } else if (type === "fanfare") {
+    const notes = [523, 659, 784, 1047]
+    notes.forEach((f, i) => play(f, i * 0.12, 0.2, 0.22))
+    play(1047, 0.5, 0.6, 0.28)
+    play(784, 0.52, 0.6, 0.2)
+    play(523, 0.54, 0.6, 0.15)
+  }
+}
 
 const CONFETTI_COLORS = ["#f472b6", "#fb923c", "#facc15", "#34d399", "#60a5fa", "#c084fc", "#f9a8d4"]
 
@@ -107,6 +156,16 @@ export default function Index() {
     containerRef.current?.scrollTo({ top: 0 })
   }
 
+  const goWithSound = (s: number, sound: Parameters<typeof playSound>[0]) => {
+    playSound(sound)
+    go(s)
+  }
+
+  useEffect(() => {
+    const timeout = setTimeout(() => playSound("meow"), 600)
+    return () => clearTimeout(timeout)
+  }, [])
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50">
       {/* decorative blobs */}
@@ -126,7 +185,7 @@ export default function Index() {
               КАТЁНА! Ты хочешь стать счастливой и пойти со мной на свидание?{")))"}
             </h1>
             <div className="relative flex h-24 items-center justify-center gap-6">
-              <button onClick={() => go(2)} className={PrimaryBtn}>
+              <button onClick={() => goWithSound(2, "yay")} className={PrimaryBtn}>
                 ДА
               </button>
               <RunawayButton className="bg-white text-rose-400 shadow-md ring-2 ring-rose-200">
@@ -143,7 +202,7 @@ export default function Index() {
             <h1 className="mb-10 break-words text-4xl font-black text-rose-500 sm:text-5xl">
               ЕЕЕЕЕЕЕЕЕЕЕЕ{")"}
             </h1>
-            <button onClick={() => go(3)} className={PrimaryBtn}>
+            <button onClick={() => goWithSound(3, "meow")} className={PrimaryBtn}>
               Дальше
             </button>
           </div>
@@ -162,7 +221,7 @@ export default function Index() {
                   key={p.label}
                   onClick={() => {
                     setPlace(p.label)
-                    go(4)
+                    goWithSound(4, "click")
                   }}
                   className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-6 font-extrabold text-rose-500 shadow-md ring-2 ring-pink-100 transition-all hover:scale-105 hover:bg-white hover:shadow-lg active:scale-95"
                 >
@@ -188,7 +247,7 @@ export default function Index() {
               className="mb-8 w-full rounded-2xl border-2 border-pink-200 bg-white/90 px-5 py-4 text-center text-lg font-bold text-rose-500 shadow-inner outline-none focus:border-pink-400"
             />
             <button
-              onClick={() => go(5)}
+              onClick={() => goWithSound(5, "sad")}
               disabled={!datetime}
               className={`${PrimaryBtn} ${!datetime ? "cursor-not-allowed opacity-40 hover:scale-100" : ""}`}
             >
@@ -222,7 +281,7 @@ export default function Index() {
               много.
             </p>
             <div className="relative flex h-28 flex-col items-center justify-center gap-4 sm:h-24 sm:flex-row">
-              <button onClick={() => go(6)} className={PrimaryBtn}>
+              <button onClick={() => goWithSound(6, "fanfare")} className={PrimaryBtn}>
                 Я отправила фото
               </button>
               <RunawayButton className="bg-white text-rose-400 shadow-md ring-2 ring-rose-200">
