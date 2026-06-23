@@ -1,6 +1,42 @@
 import { useState, useRef, useEffect } from "react"
 import Icon from "@/components/ui/icon"
 
+function playPurr() {
+  const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+  const duration = 3.5
+
+  const osc = ctx.createOscillator()
+  const lfo = ctx.createOscillator()
+  const lfoGain = ctx.createGain()
+  const gain = ctx.createGain()
+
+  lfo.frequency.value = 25
+  lfoGain.gain.value = 18
+  lfo.connect(lfoGain)
+  lfoGain.connect(osc.frequency)
+
+  osc.type = "sawtooth"
+  osc.frequency.value = 80
+
+  const filter = ctx.createBiquadFilter()
+  filter.type = "lowpass"
+  filter.frequency.value = 400
+
+  osc.connect(filter)
+  filter.connect(gain)
+  gain.connect(ctx.destination)
+
+  gain.gain.setValueAtTime(0, ctx.currentTime)
+  gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.3)
+  gain.gain.setValueAtTime(0.12, ctx.currentTime + duration - 0.3)
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration)
+
+  lfo.start(ctx.currentTime)
+  osc.start(ctx.currentTime)
+  lfo.stop(ctx.currentTime + duration)
+  osc.stop(ctx.currentTime + duration)
+}
+
 function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare") {
   const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
 
@@ -162,7 +198,7 @@ export default function Index() {
   }
 
   useEffect(() => {
-    const timeout = setTimeout(() => playSound("meow"), 600)
+    const timeout = setTimeout(() => playPurr(), 600)
     return () => clearTimeout(timeout)
   }, [])
 
