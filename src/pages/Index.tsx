@@ -218,7 +218,7 @@ export default function Index() {
           <div key="s1" className="w-full max-w-md animate-pop-in text-center">
             <CatImage src={CATS.ask} alt="Милый котик" />
             <h1 className="mb-10 text-3xl font-black leading-snug text-rose-500 sm:text-4xl">
-              КАТЁНА! Ты хочешь стать счастливой и пойти со мной на свидание?{")))"}
+              КАТЁНА! Ты хочешь пойти со мной на свидание?{")))"}
             </h1>
             <div className="relative flex h-24 items-center justify-center gap-6">
               <button onClick={() => goWithSound(2, "yay")} className={PrimaryBtn}>
