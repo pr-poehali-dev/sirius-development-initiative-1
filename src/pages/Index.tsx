@@ -51,7 +51,7 @@ const CATS = {
 
 const PLACES = [
   { label: "Кино", icon: "Film" },
-  { label: "Ресторан", icon: "UtensilsCrossed" },
+  { label: "Кафе-мафе, покушать", icon: "UtensilsCrossed" },
   { label: "Цирк", icon: "Drama" },
   { label: "Аттракционы", icon: "FerrisWheel" },
 ]
