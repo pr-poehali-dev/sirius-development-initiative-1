@@ -111,8 +111,9 @@ function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare" |
     play(400, 0.25, 0.35, 0.18)
     play(350, 0.5, 0.5, 0.15)
   } else if (type === "error") {
-    play(300, 0, 0.15, 0.25, "square")
-    play(220, 0.14, 0.25, 0.2, "square")
+    play(180, 0, 0.18, 0.4, "sawtooth")
+    play(120, 0.15, 0.3, 0.35, "sawtooth")
+    play(80, 0.35, 0.4, 0.3, "sawtooth")
   } else if (type === "fanfare") {
     const notes = [523, 659, 784, 1047]
     notes.forEach((f, i) => play(f, i * 0.12, 0.2, 0.22))
