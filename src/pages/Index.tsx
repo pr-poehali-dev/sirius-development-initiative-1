@@ -239,7 +239,7 @@ export default function Index() {
   }
 
   useEffect(() => {
-    const timeout = setTimeout(() => playKisKis(), 600)
+    const timeout = setTimeout(() => playSound("meow"), 600)
     return () => clearTimeout(timeout)
   }, [])
 
