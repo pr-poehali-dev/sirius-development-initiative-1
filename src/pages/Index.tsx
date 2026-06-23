@@ -240,11 +240,8 @@ export default function Index() {
               <h1 className="animate-yay mb-4 text-6xl font-black text-rose-500 sm:text-7xl">
                 УРА!!!!
               </h1>
-              <p className="mb-3 text-xl font-extrabold text-pink-500">
-                Жду звонка! 🐾
-              </p>
-              <p className="text-base font-semibold text-rose-400/80">
-                Буду ждать, пока ты придёшь в себя от счастья {"💕"}
+              <p className="text-xl font-extrabold text-pink-500">
+                Жди звонка! И жди пока я приду в себя от счастья 💕
               </p>
             </div>
           </>
