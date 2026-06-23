@@ -70,7 +70,7 @@ function playPurr() {
   osc.stop(ctx.currentTime + duration)
 }
 
-function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare") {
+function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare" | "error") {
   const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
 
   const play = (freq: number, start: number, dur: number, vol = 0.3, wave: OscillatorType = "sine") => {
@@ -110,6 +110,9 @@ function playSound(type: "meow" | "yay" | "click" | "tick" | "sad" | "fanfare") 
     play(500, 0, 0.3, 0.2)
     play(400, 0.25, 0.35, 0.18)
     play(350, 0.5, 0.5, 0.15)
+  } else if (type === "error") {
+    play(300, 0, 0.15, 0.25, "square")
+    play(220, 0.14, 0.25, 0.2, "square")
   } else if (type === "fanfare") {
     const notes = [523, 659, 784, 1047]
     notes.forEach((f, i) => play(f, i * 0.12, 0.2, 0.22))
@@ -179,6 +182,7 @@ function RunawayButton({ children, className = "" }: { children: React.ReactNode
   const [pos, setPos] = useState({ x: 0, y: 0 })
 
   const runAway = () => {
+    playSound("error")
     const angle = Math.random() * Math.PI * 2
     const dist = 120 + Math.random() * 80
     setPos({ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist })
@@ -191,7 +195,7 @@ function RunawayButton({ children, className = "" }: { children: React.ReactNode
         e.preventDefault()
         runAway()
       }}
-      onClick={(e) => e.preventDefault()}
+      onClick={(e) => { e.preventDefault(); playSound("error") }}
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
       className={`relative rounded-full px-10 py-4 text-lg font-extrabold transition-transform duration-200 ease-out ${className}`}
     >
